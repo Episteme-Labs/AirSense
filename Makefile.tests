@@ -1,0 +1,31 @@
+# Makefile for AirSense Unit Tests
+# Convenience wrapper around the Python test runner
+
+.PHONY: help test clean build run
+
+# Default target
+help:
+	@echo "AirSense Unit Test Makefile"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  make test       - Build and run all tests"
+	@echo "  make clean      - Clean build directory and rebuild"
+	@echo "  make build      - Build tests only (don't run)"
+	@echo "  make run        - Run tests only (assumes already built)"
+	@echo "  make help       - Show this help message"
+
+# Build and run tests
+test:
+	@python3 run_tests.py
+
+# Clean build and run
+clean:
+	@python3 run_tests.py --clean
+
+# Build only
+build:
+	@python3 run_tests.py --build-only
+
+# Run only
+run:
+	@python3 run_tests.py --run-only

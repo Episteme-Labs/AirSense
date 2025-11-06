@@ -14,7 +14,6 @@
 
 #include "hardware/uart.h"
 #include "hardware/gpio.h"
-#include "src/datasheet/pms7003_defs.h"
 
 void pm25_sensor_init(void) {
 }

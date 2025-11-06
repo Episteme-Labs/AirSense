@@ -61,3 +61,7 @@ target_link_libraries(AirSense)
 
 pico_add_extra_outputs(AirSense)
 
+# Only include tests if explicitly building for host
+# if(NOT PICO_ON_DEVICE)
+#     add_subdirectory(tests)
+# endif()
