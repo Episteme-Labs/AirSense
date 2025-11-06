@@ -38,6 +38,7 @@ pico_sdk_init()
 add_executable(AirSense
     src/AirSense.c
     src/drivers/uart/pm2_5.c
+    src/drivers/uart/pm2_5_hal_real.c
 )
 
 pico_set_program_name(AirSense "AirSense")
@@ -49,11 +50,16 @@ pico_enable_stdio_usb(AirSense 0)
 
 # Add the standard library to the build
 target_link_libraries(AirSense
-        pico_stdlib)
+        pico_stdlib
+        hardware_uart
+        hardware_gpio)
 
 # Add the standard include files to the build
 target_include_directories(AirSense PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/src/drivers/uart
+        ${CMAKE_CURRENT_LIST_DIR}/src/config
+        ${CMAKE_CURRENT_LIST_DIR}/src/datasheet
 )
 
 # Add any user requested libraries

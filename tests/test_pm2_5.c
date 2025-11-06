@@ -53,17 +53,22 @@ bool pm25_sensor_read(pm25_data_t *data) {
     
     // Check if data is available
     if (!uart_is_readable(PMS_UART)) {
+        printf("DEBUG: uart_is_readable returned false\n");
         return false;
     }
     
     // Read start bytes
     uart_read_blocking(PMS_UART, &frame[0], 1);
+    printf("DEBUG: frame[0] = 0x%02X (expected 0x%02X)\n", frame[0], PMS_FRAME_START1);
     if (frame[0] != PMS_FRAME_START1) {
+        printf("DEBUG: Bad start byte 1\n");
         return false;
     }
     
     uart_read_blocking(PMS_UART, &frame[1], 1);
+    printf("DEBUG: frame[1] = 0x%02X (expected 0x%02X)\n", frame[1], PMS_FRAME_START2);
     if (frame[1] != PMS_FRAME_START2) {
+        printf("DEBUG: Bad start byte 2\n");
         return false;
     }
     
@@ -72,7 +77,9 @@ bool pm25_sensor_read(pm25_data_t *data) {
     
     // Verify frame length
     uint16_t frame_len = (frame[2] << 8) | frame[3];
+    printf("DEBUG: frame_len = %d (expected %d)\n", frame_len, PMS_DATA_FRAME_LEN);
     if (frame_len != PMS_DATA_FRAME_LEN) {
+        printf("DEBUG: Bad frame length\n");
         return false;
     }
     
@@ -83,7 +90,11 @@ bool pm25_sensor_read(pm25_data_t *data) {
     }
     uint16_t received_checksum = (frame[PMS_FRAME_LENGTH - 2] << 8) | frame[PMS_FRAME_LENGTH - 1];
     
+    printf("DEBUG: Frame bytes 28-31: 0x%02X 0x%02X 0x%02X 0x%02X\n", 
+           frame[28], frame[29], frame[30], frame[31]);
+    printf("DEBUG: calculated checksum = 0x%04X, received = 0x%04X\n", checksum, received_checksum);
     if (checksum != received_checksum) {
+        printf("DEBUG: Checksum mismatch\n");
         return false;
     }
     

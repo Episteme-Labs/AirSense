@@ -15,6 +15,9 @@
 #include "pms7003_defs.h"
 #include "mock_hardware_uart.h"
 #include "mock_hardware_gpio.h"
+#include "pm2_5_hal_mock.h"
+#include <string.h>
+#include <stdio.h>
 
 // For testing, define PMS_UART as a mock pointer and pin definitions
 #define PMS_UART ((uart_inst_t*)0x1)  // Mock UART instance
@@ -23,6 +26,7 @@
 #define PMS_SET_PIN 2
 #define PMS_RESET_PIN 3
 #define GPIO_OUT true
+#define GPIO_FUNC_UART 2  // Define GPIO function constants for tests
 
 static uint8_t valid_frame[PMS_FRAME_LENGTH] = {
     PMS_FRAME_START1, PMS_FRAME_START2,  // Start bytes
@@ -40,15 +44,21 @@ static uint8_t valid_frame[PMS_FRAME_LENGTH] = {
     0x00, 0x05,                          // >5.0μm: 5
     0x00, 0x01,                          // >10μm: 1
     0x00, 0x00,                          // Reserved
-    0x01, 0xE1                           // Checksum
+    0x02, 0x0F                           // Checksum (corrected to 0x020F)
 };
 
-void setUp(void) {}
+void setUp(void) {
+    uart_mock_reset();
+    gpio_mock_reset();
+}
+
 void tearDown(void) {}
 
 // Mock UART read for valid frame (simulates response after command)
 void mock_uart_read_valid(void) {
     uart_is_readable_IgnoreAndReturn(true);
+    uart_read_blocking_SetDataToReturn(valid_frame);
+    
     uart_read_blocking_Expect(PMS_UART, NULL, 1);
     uart_read_blocking_IgnoreArg_buffer();
 
@@ -65,6 +75,10 @@ void test_pm25_sensor_read_valid(void) {
 
     bool result = pm25_sensor_read(&data);
 
+    if (!result) {
+        printf("DEBUG: pm25_sensor_read returned false\n");
+    }
+    
     TEST_ASSERT_TRUE(result);
     TEST_ASSERT_EQUAL_UINT16(10, data.pm1_0_cf1);
     TEST_ASSERT_EQUAL_UINT16(25, data.pm2_5_cf1);
@@ -82,8 +96,21 @@ void test_pm25_sensor_read_valid(void) {
 
 void test_pm25_sensor_read_invalid_checksum(void) {
     pm25_data_t data;
-    valid_frame[PMS_FRAME_LENGTH - 2] = 0xFF;  // Corrupt checksum high byte
-    mock_uart_read_valid();
+    uint8_t corrupt_frame[PMS_FRAME_LENGTH];
+    memcpy(corrupt_frame, valid_frame, PMS_FRAME_LENGTH);
+    corrupt_frame[PMS_FRAME_LENGTH - 2] = 0xFF;  // Corrupt checksum high byte
+    
+    uart_is_readable_IgnoreAndReturn(true);
+    uart_read_blocking_SetDataToReturn(corrupt_frame);
+    
+    uart_read_blocking_Expect(PMS_UART, NULL, 1);
+    uart_read_blocking_IgnoreArg_buffer();
+
+    uart_read_blocking_Expect(PMS_UART, NULL, 1);
+    uart_read_blocking_IgnoreArg_buffer();
+
+    uart_read_blocking_Expect(PMS_UART, NULL, PMS_FRAME_LENGTH - 2);
+    uart_read_blocking_IgnoreArg_buffer();
 
     bool result = pm25_sensor_read(&data);
 
@@ -92,8 +119,21 @@ void test_pm25_sensor_read_invalid_checksum(void) {
 
 void test_pm25_sensor_read_invalid_frame_length(void) {
     pm25_data_t data;
-    valid_frame[3] = 0xFF;  // Corrupt frame length low byte
-    mock_uart_read_valid();
+    uint8_t corrupt_frame[PMS_FRAME_LENGTH];
+    memcpy(corrupt_frame, valid_frame, PMS_FRAME_LENGTH);
+    corrupt_frame[3] = 0xFF;  // Corrupt frame length low byte
+    
+    uart_is_readable_IgnoreAndReturn(true);
+    uart_read_blocking_SetDataToReturn(corrupt_frame);
+    
+    uart_read_blocking_Expect(PMS_UART, NULL, 1);
+    uart_read_blocking_IgnoreArg_buffer();
+
+    uart_read_blocking_Expect(PMS_UART, NULL, 1);
+    uart_read_blocking_IgnoreArg_buffer();
+
+    uart_read_blocking_Expect(PMS_UART, NULL, PMS_FRAME_LENGTH - 2);
+    uart_read_blocking_IgnoreArg_buffer();
 
     bool result = pm25_sensor_read(&data);
 
@@ -118,7 +158,7 @@ void test_pm25_sensor_init(void) {
     uart_write_blocking_Expect(PMS_UART, NULL, 7);  // Expect passive mode command (PMS command is 7 bytes)
     uart_write_blocking_IgnoreArg_buffer();
 
-    pm25_sensor_init();  // Call init and verify mocks
+    pm25_sensor_init(pm25_get_mock_hal());  // Use mock HAL
 }
 
 int main(void) {

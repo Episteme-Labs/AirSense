@@ -16,21 +16,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// Type definitions needed for GPIO mocking
-typedef unsigned int uint;
-typedef enum {
-    GPIO_FUNC_XIP = 0,
-    GPIO_FUNC_SPI = 1,
-    GPIO_FUNC_UART = 2,
-    GPIO_FUNC_I2C = 3,
-    GPIO_FUNC_PWM = 4,
-    GPIO_FUNC_SIO = 5,
-    GPIO_FUNC_PIO0 = 6,
-    GPIO_FUNC_PIO1 = 7,
-    GPIO_FUNC_GPCK = 8,
-    GPIO_FUNC_USB = 9,
-    GPIO_FUNC_NULL = 0x1f
-} gpio_function_t;
+// Include HAL header for type consistency
+#include "pm2_5_hal.h"
+
+// Type definitions needed for GPIO mocking (uint comes from HAL)
+// gpio_function_t comes from HAL
 
 // Mock function declarations
 void gpio_init(uint gpio);
@@ -43,5 +33,8 @@ void gpio_init_Expect(uint gpio);
 void gpio_set_dir_Expect(uint gpio, bool out);
 void gpio_put_Expect(uint gpio, bool value);
 void gpio_set_function_Expect(uint gpio, gpio_function_t fn);
+
+// Mock control helpers
+void gpio_mock_reset(void);
 
 #endif // MOCK_HARDWARE_GPIO_H

@@ -34,4 +34,8 @@ void uart_read_blocking_IgnoreArg_buffer(void);
 void uart_write_blocking_Expect(uart_inst_t *uart, const uint8_t *src, size_t len);
 void uart_write_blocking_IgnoreArg_buffer(void);
 
+// Mock control helpers
+void uart_read_blocking_SetDataToReturn(uint8_t *data);
+void uart_mock_reset(void);
+
 #endif // MOCK_HARDWARE_UART_H

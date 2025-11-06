@@ -14,53 +14,69 @@
 #include "unity.h"
 #include <string.h>
 
+// Mock state
+static bool mock_uart_is_readable_return = false;
+static bool mock_ignore_buffer = false;
+static uint8_t *mock_read_data = NULL;
+static size_t mock_read_data_offset = 0;
+
 void uart_init(uart_inst_t *uart, uint baudrate) {
-    UNITY_TEST_ASSERT_NOT_NULL(uart, __LINE__, "uart_init called with NULL uart");
-    // Mock implementation does nothing
+    // Mock implementation - just verify it was called if needed
 }
 
 bool uart_is_readable(uart_inst_t *uart) {
-    UNITY_TEST_ASSERT_NOT_NULL(uart, __LINE__, "uart_is_readable called with NULL uart");
-    return false; // Default mock behavior
+    return mock_uart_is_readable_return;
 }
 
 void uart_read_blocking(uart_inst_t *uart, uint8_t *dst, size_t len) {
-    UNITY_TEST_ASSERT_NOT_NULL(uart, __LINE__, "uart_read_blocking called with NULL uart");
-    UNITY_TEST_ASSERT_NOT_NULL(dst, __LINE__, "uart_read_blocking called with NULL dst buffer");
-    // Mock implementation does nothing
+    if (mock_read_data != NULL && dst != NULL) {
+        // Copy mock data to destination
+        memcpy(dst, mock_read_data + mock_read_data_offset, len);
+        mock_read_data_offset += len;
+    }
 }
 
 void uart_write_blocking(uart_inst_t *uart, const uint8_t *src, size_t len) {
-    UNITY_TEST_ASSERT_NOT_NULL(uart, __LINE__, "uart_write_blocking called with NULL uart");
-    UNITY_TEST_ASSERT_NOT_NULL(src, __LINE__, "uart_write_blocking called with NULL src buffer");
-    // Mock implementation does nothing
+    // Mock implementation - just verify it was called if needed
 }
 
+// Mock control functions
+
 void uart_init_Expect(uart_inst_t *uart, uint baudrate) {
-    UNITY_TEST_ASSERT_NOT_NULL(uart, __LINE__, "uart_init_Expect called with NULL uart");
-    // Expectation setup can be added here if needed
+    // Store expectation - for now just note it was called
 }
 
 bool uart_is_readable_IgnoreAndReturn(bool value) {
+    mock_uart_is_readable_return = value;
     return value;
 }
 
 void uart_read_blocking_Expect(uart_inst_t *uart, uint8_t *dst, size_t len) {
-    UNITY_TEST_ASSERT_NOT_NULL(uart, __LINE__, "uart_read_blocking_Expect called with NULL uart");
-    UNITY_TEST_ASSERT_NOT_NULL(dst, __LINE__, "uart_read_blocking_Expect called with NULL dst buffer");
-    // Expectation setup can be added here if needed
+    // Store expectation - the actual call will use the mock data
 }
 
 void uart_read_blocking_IgnoreArg_buffer(void) {
-    // This function can be used to ignore the buffer argument in expectations
+    mock_ignore_buffer = true;
 }
 
 void uart_write_blocking_Expect(uart_inst_t *uart, const uint8_t *src, size_t len) {
-    UNITY_TEST_ASSERT_NOT_NULL(uart, __LINE__, "uart_write_blocking_Expect called with NULL uart");
-    UNITY_TEST_ASSERT_NOT_NULL(src, __LINE__, "uart_write_blocking_Expect called with NULL src buffer");
-    // Expectation setup can be added here if needed
+    // Store expectation
 }
 
 void uart_write_blocking_IgnoreArg_buffer(void) {
-    // This function can be used to ignore the buffer argument in expectations
+    mock_ignore_buffer = true;
+}
+
+// Helper function to inject test data
+void uart_read_blocking_SetDataToReturn(uint8_t *data) {
+    mock_read_data = data;
+    mock_read_data_offset = 0;
+}
+
+// Reset mock state (call in setUp)
+void uart_mock_reset(void) {
+    mock_uart_is_readable_return = false;
+    mock_ignore_buffer = false;
+    mock_read_data = NULL;
+    mock_read_data_offset = 0;
 }

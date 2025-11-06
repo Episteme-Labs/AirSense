@@ -16,6 +16,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// Forward declaration
+struct pm25_hal;
+typedef struct pm25_hal pm25_hal_t;
+
 // Structure to hold PM2.5 sensor data based on PMS7003 output format
 typedef struct {
     uint16_t pm1_0_cf1;     // PM1.0 concentration (CF=1, standard particle) in μg/m³
@@ -33,7 +37,8 @@ typedef struct {
 } pm25_data_t;
 
 // Initialize the pm2.5 sensor (PMS7003 via UART)
-void pm25_sensor_init(void);
+// If hal is NULL, uses default (real hardware) HAL
+void pm25_sensor_init(const pm25_hal_t *hal);
 
 // Read data from PM2.5 sensor
 // Return true on successful read with valid checksum, false otherwise

@@ -12,7 +12,14 @@
 #ifndef PIN_CONFIG_H
 #define PIN_CONFIG_H
 
-#define PMS_UART uart1               // UART instance for PMS7003
+// For test builds, use integer values instead of hardware pointers
+#ifdef PM25_HAL_MOCK_BUILD
+#define PMS_UART ((uart_inst_t *)0x1)  // Dummy UART pointer for tests
+#else
+#include "hardware/uart.h"
+#define PMS_UART uart1                  // UART instance for PMS7003
+#endif
+
 #define PMS_TX_PIN 0              // GPIO pin of Pico W for PMS7003 TX
 #define PMS_RX_PIN 1              // GPIO pin of Pico W for PMS7003 RX
 #define PMS_SET_PIN 2             // GPIO pin of Pico W for PMS7003 SET
