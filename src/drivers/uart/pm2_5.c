@@ -13,6 +13,8 @@
 #include "pms7003_defs.h"
 #include <stdio.h>
 
+const uint8_t PMS_PASSIVE_MODE_CMD[PMS_PASSIVE_MODE_CMD_LEN] = {0x42, 0x4D, 0xE1, 0x00, 0x00, 0x01, 0x70};
+
 // Static HAL instance - set during init
 static const pm25_hal_t *g_hal = NULL;
 
@@ -21,30 +23,41 @@ void pm25_sensor_init(const pm25_hal_t *hal) {
     g_hal = (hal != NULL) ? hal : pm25_get_default_hal();
     
     // Initialize UART with the configured baud rate
-    g_hal->uart->init(PMS_UART, PMS_BAUD_RATE);
+    if (g_hal->uart != NULL) {
+        g_hal->uart->init(PMS_UART, PMS_BAUD_RATE);
+    } else {
+        printf("DEBUG: UART HAL is NULL\n");
+    }
     
-    // Configure TX and RX pins for UART
-    g_hal->gpio->set_function(PMS_TX_PIN, GPIO_FUNC_UART);
-    g_hal->gpio->set_function(PMS_RX_PIN, GPIO_FUNC_UART);
-    
-    // Initialize SET pin (for mode control)
-    g_hal->gpio->init(PMS_SET_PIN);
-    g_hal->gpio->set_dir(PMS_SET_PIN, true);  // Output
-    g_hal->gpio->put(PMS_SET_PIN, 1);         // Active mode
-    
-    // Initialize RESET pin
-    g_hal->gpio->init(PMS_RESET_PIN);
-    g_hal->gpio->set_dir(PMS_RESET_PIN, true);  // Output
-    g_hal->gpio->put(PMS_RESET_PIN, 1);         // Not in reset
+    if (g_hal->gpio != NULL) {
+        g_hal->gpio->set_function(PMS_TX_PIN, GPIO_FUNC_UART);
+        g_hal->gpio->set_function(PMS_RX_PIN, GPIO_FUNC_UART);
+
+        // Initialize SET pin (for mode control)
+        g_hal->gpio->init(PMS_SET_PIN);
+        g_hal->gpio->set_dir(PMS_SET_PIN, true);  // Output
+        g_hal->gpio->put(PMS_SET_PIN, 1);         // Active mode
+
+        // Initialize RESET pin
+        g_hal->gpio->init(PMS_RESET_PIN);
+        g_hal->gpio->set_dir(PMS_RESET_PIN, true);  // Output
+        g_hal->gpio->put(PMS_RESET_PIN, 1);         // Not in reset
+    } else {
+        printf("DEBUG: GPIO HAL is NULL\n");
+    }
     
     // Send passive mode command
-    uint8_t passive_mode_cmd[7] = {0x42, 0x4D, 0xE1, 0x00, 0x00, 0x01, 0x70};
-    g_hal->uart->write_blocking(PMS_UART, passive_mode_cmd, 7);
+    g_hal->uart->write_blocking(PMS_UART, PMS_PASSIVE_MODE_CMD, PMS_PASSIVE_MODE_CMD_LEN);
 }
 
 bool pm25_sensor_read(pm25_data_t *data) {
     if (data == NULL || g_hal == NULL) {
         printf("DEBUG: data=%p, g_hal=%p\n", (void*)data, (void*)g_hal);
+        return false;
+    }
+
+    if (g_hal->uart == NULL) {
+        printf("DEBUG: UART HAL is NULL\n");
         return false;
     }
     

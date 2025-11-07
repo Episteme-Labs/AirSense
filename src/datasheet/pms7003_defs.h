@@ -57,7 +57,9 @@
 #define PMS_FRAME_LENGTH 32            // Data Frame Length (bytes)
 
 // Commands (from datasheet or standard PMS protocol; checksum included)
+#define PMS_PASSIVE_MODE_CMD_LEN 7
 #define PMS_CMD_SET_PASSIVE {0x42, 0x4D, 0xE1, 0x00, 0x00, 0x01, 0x70}  // Set to passive mode
+#define PMS_ACTIVE_MODE_CMD_LEN 7
 #define PMS_CMD_READ_PASSIVE {0x42, 0x4D, 0xE2, 0x00, 0x00, 0x01, 0x71} // Read data in passive mode
 #define PMS_CMD_SET_ACTIVE {0x42, 0x4D, 0xE1, 0x00, 0x01, 0x01, 0x71}   // Set to active mode
 #define PMS_CMD_SLEEP {0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73}       // Enter sleep mode
