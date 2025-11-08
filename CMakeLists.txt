@@ -42,6 +42,7 @@ add_executable(AirSense
     src/drivers/i2c/temp_hum.c
     src/network/wifi/wifi.c
     src/network/mqtt/mqtt_client.c
+    src/utils/logger.c
 )
 
 pico_set_program_name(AirSense "AirSense")
@@ -66,6 +67,7 @@ target_include_directories(AirSense PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/src/datasheet
         ${CMAKE_CURRENT_LIST_DIR}/src/network/wifi
         ${CMAKE_CURRENT_LIST_DIR}/src/network/mqtt
+        ${CMAKE_CURRENT_LIST_DIR}/src/utils
 )
 
 # Add any user requested libraries
