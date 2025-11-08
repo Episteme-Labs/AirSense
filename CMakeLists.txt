@@ -39,6 +39,7 @@ add_executable(AirSense
     src/AirSense.c
     src/drivers/uart/pm2_5.c
     src/drivers/uart/pm2_5_hal_real.c
+    src/drivers/i2c/temp_hum.c
     src/network/wifi/wifi.c
     src/network/mqtt/mqtt_client.c
 )
@@ -60,6 +61,7 @@ target_link_libraries(AirSense
 target_include_directories(AirSense PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/src/drivers/uart
+        ${CMAKE_CURRENT_LIST_DIR}/src/drivers/i2c
         ${CMAKE_CURRENT_LIST_DIR}/src/config
         ${CMAKE_CURRENT_LIST_DIR}/src/datasheet
         ${CMAKE_CURRENT_LIST_DIR}/src/network/wifi
