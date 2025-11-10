@@ -33,6 +33,9 @@ project(AirSense C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+# Add subdirectory for pico_ili9225 library
+add_subdirectory(libs/pico_ili9225)
+
 # Add executable. Default name is the project name, version 0.1
 
 add_executable(AirSense
